@@ -2,6 +2,7 @@ import { env } from "@/env";
 import { Button } from "@/presentation/components/button";
 import { Whatsapp } from "@/presentation/components/whatsapp";
 import Image from "next/image";
+import type { Sections } from "../(private)/content/page";
 
 // ✅ Note: precisa ser async se você usa `await fetch()`
 export default async function Home() {
@@ -12,7 +13,7 @@ export default async function Home() {
   return (
     <>
       <main className="">
-        {sections.map((section) => {
+        {sections.map((section: Sections) => {
           switch (section.section) {
             case 1:
               return (
@@ -29,7 +30,7 @@ export default async function Home() {
                       {section.subtitle}
                     </h2>
                     <h3 className="font-light">{section.content}</h3>
-                    <Button>{section.button.content}</Button>
+                    <Button>{section?.button?.content}</Button>
                   </div>
                   <Image
                     alt="Foto Marielly"
@@ -81,25 +82,28 @@ export default async function Home() {
                       {section.subtitle}
                     </p>
                     <div className="flex flex-col md:flex-row gap-8 justify-center items-center">
-                      {section.cards.map((card, i) => (
-                        <div
-                          key={i}
-                          className="flex flex-col w-[320px] items-center"
-                        >
-                          <Image
-                            alt="Foto Marielly"
-                            src={card.image}
-                            className="w-full"
-                            width={350}
-                            height={230}
-                          />
-                          <div className="bg-secondary p-4 h-full">
-                            <span className="text-primary">{card.content}</span>
+                      {section.cards &&
+                        section?.cards.map((card, i) => (
+                          <div
+                            key={i}
+                            className="flex flex-col w-[320px] items-center"
+                          >
+                            <Image
+                              alt="Foto Marielly"
+                              src={card.image}
+                              className="w-full"
+                              width={350}
+                              height={230}
+                            />
+                            <div className="bg-secondary p-4 h-full">
+                              <span className="text-primary">
+                                {card.content}
+                              </span>
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        ))}
                     </div>
-                    <Button>{section.button.content}</Button>
+                    <Button>{section?.button?.content}</Button>
                   </div>
                 </section>
               );
@@ -119,21 +123,22 @@ export default async function Home() {
                       {section.subtitle}
                     </p>
                     <div className="flex flex-col sm:flex-row justify-center gap-4">
-                      {section.buttons.map((btn, idx) => (
-                        <a
-                          key={idx}
-                          href={btn.link}
-                          target={btn.type === "email" ? undefined : "_blank"}
-                          rel="noopener noreferrer"
-                          className={`px-6 py-3 rounded-lg font-semibold transition ${
-                            btn.type === "whatsapp"
-                              ? "bg-secondary text-white hover:bg-secondary/70"
-                              : "bg-tertiary text-white hover:bg-tertiary/70"
-                          }`}
-                        >
-                          {btn.content}
-                        </a>
-                      ))}
+                      {section.buttons &&
+                        section?.buttons.map((btn, idx) => (
+                          <a
+                            key={idx}
+                            href={btn.link}
+                            target={btn.type === "email" ? undefined : "_blank"}
+                            rel="noopener noreferrer"
+                            className={`px-6 py-3 rounded-lg font-semibold transition ${
+                              btn.type === "whatsapp"
+                                ? "bg-secondary text-white hover:bg-secondary/70"
+                                : "bg-tertiary text-white hover:bg-tertiary/70"
+                            }`}
+                          >
+                            {btn.content}
+                          </a>
+                        ))}
                     </div>
                   </div>
                 </section>
@@ -157,7 +162,7 @@ export default async function Home() {
                     </h2>
                     <h3 className="font-light">{section.content}</h3>
                     <div className="pb-8">
-                      <Button>{section.button.content}</Button>
+                      <Button>{section?.button?.content}</Button>
                     </div>
                   </div>
                 </section>

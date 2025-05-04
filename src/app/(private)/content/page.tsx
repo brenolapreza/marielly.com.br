@@ -5,17 +5,19 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 
+export type Sections = {
+  section: number;
+  title?: string;
+  subtitle?: string;
+  content: string[];
+  image?: string;
+  button?: { link: string; content: string };
+  cards?: { image: string; content: string }[];
+  buttons?: { type: string; link: string; content: string }[];
+};
+
 type FormValues = {
-  sections: {
-    section: number;
-    title?: string;
-    subtitle?: string;
-    content: string[];
-    image?: string;
-    button?: { link: string; content: string };
-    cards?: { image: string; content: string }[];
-    buttons?: { type: string; link: string; content: string }[];
-  }[];
+  sections: Sections[];
 };
 
 export default function ContentManager() {
@@ -34,7 +36,7 @@ export default function ContentManager() {
       .then((res) => res.json())
       .then((data) => {
         reset({
-          sections: data.map((section: any) => ({
+          sections: data.map((section: Sections) => ({
             section: section.section,
             title: section.title || "",
             subtitle: section.subtitle || "",
