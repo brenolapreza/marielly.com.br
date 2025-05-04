@@ -4,15 +4,21 @@ import { Whatsapp } from "@/presentation/components/whatsapp";
 import Image from "next/image";
 import type { Sections } from "../(private)/content/page";
 
-// ✅ Note: precisa ser async se você usa `await fetch()`
 export default async function Home() {
-  const res = await fetch(`${env.URL}/api/`, {
+  const res = await fetch(`${env.URL}/api`, {
+    cache: "no-store",
     method: "GET",
   });
+
+  if (!res.ok) {
+    throw new Error(`Failed to fetch sections: ${res.statusText}`);
+  }
+
   const sections = await res.json();
+
   return (
     <>
-      <main className="">
+      <main>
         {sections.map((section: Sections) => {
           switch (section.section) {
             case 1:
