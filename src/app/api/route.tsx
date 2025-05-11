@@ -1,63 +1,45 @@
-import { env } from "@/env";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcrypt";
-import { serialize } from "cookie";
+import type { NextApiRequest, NextApiResponse } from "next";
 import jwt from "jsonwebtoken";
+import { env } from "@/env";
+import { serialize } from "cookie";
 
-export async function POST(req: Request) {
-  if (!req.body) {
-    return new Response(JSON.stringify({ message: "Requisição inválida" }), {
-      status: 400,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
+  if (!req.body) return null;
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const body = await req.json();
-
-  const { email, password } = body;
+  const { email, password } = req.body;
 
   try {
     const user = await prisma.user.findUnique({ where: { email } });
 
     if (!user || !(await bcrypt.compare(password, user.password))) {
-      return new Response(JSON.stringify({ message: "Invalid credentials" }), {
-        status: 500,
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      return res.status(401).json({ error: "Invalid credentials" });
     }
 
     const token = jwt.sign({ id: user.id, email: user.email }, env.JWT_SECRET, {
       expiresIn: "1h",
     });
 
-    const headers = new Headers();
-    headers.set(
+    res.setHeader(
       "Set-Cookie",
       serialize("token", token, {
         httpOnly: true,
         sameSite: "strict",
         path: "/",
-        maxAge: 3600,
+        maxAge: 3600, // 1hr
       })
     );
 
-    return new Response(JSON.stringify({ message: "Login successful" }), {
-      status: 200,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    return res.status(200).json({ message: "Login successful" });
   } catch {
-    return new Response(JSON.stringify({ message: "Internal server error" }), {
-      status: 200,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    return res.status(500).json({ error: "Internal server error" });
   }
 }
 
