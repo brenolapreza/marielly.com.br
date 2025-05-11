@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Raleway } from "next/font/google";
 import "./globals.css";
+import { Header } from "./ui/components/header";
 
 const geistSans = Raleway({
   variable: "--font-raleway-sans",
@@ -20,6 +21,7 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <body className={`${geistSans.variable} antialiased scroll-smooth`}>
+        <Header />
         {children}
       </body>
     </html>

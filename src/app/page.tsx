@@ -1,19 +1,90 @@
-import { env } from "@/env";
-import { Button } from "@/presentation/components/button";
-import { Whatsapp } from "@/presentation/components/whatsapp";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import Image from "next/image";
-import type { Sections } from "../(private)/content/page";
+import { n2m } from "./lib/notion";
+import type { Section } from "./lib/notion/types";
+import { Button } from "./ui/components/button";
+import { Whatsapp } from "./ui/components/whatsapp";
+import type { Key } from "react";
 
-// ✅ Note: precisa ser async se você usa `await fetch()`
 export default async function Home() {
-  const res = await fetch(`${env.URL}/api/`, {
-    method: "GET",
-  });
-  const sections = await res.json();
+  const mdBlocks = await n2m.pageToMarkdown(
+    "1f034ae0-7f65-81f6-bcaa-f1d1628f012a"
+  );
+  const mdString = n2m.toMarkdownString(mdBlocks);
+
+  function parseMarkdownToSections(markdown: string): Section[] {
+    const sections = markdown.split(/^---$/m); // separa pelas linhas '---'
+
+    return sections.map((rawSection) => {
+      const section: Section = {
+        section: 0,
+      };
+
+      const sectionNumber = rawSection.match(/# Seção (\d+)/);
+      if (sectionNumber) section.section = Number(sectionNumber[1]);
+
+      const title = rawSection.match(/\*\*Título:\*\* (.+)/);
+      if (title) section.title = title[1].trim();
+
+      const subtitle = rawSection.match(/\*\*Subtítulo:\*\* (.+)/);
+      if (subtitle) section.subtitle = subtitle[1].trim();
+
+      const button = rawSection.match(/\[\*\*(.+?)\*\*\]\((https?:\/\/.+?)\)/);
+      if (button) {
+        section.button = {
+          content: button[1],
+          link: button[2],
+        };
+      }
+
+      const contentMatches = [...rawSection.matchAll(/\d+\. (.+)/g)];
+      if (contentMatches.length > 0) {
+        section.content = contentMatches.map((m) => m[1]);
+      } else {
+        const contentText = rawSection.match(
+          /\*\*Conteúdo:\*\*([\s\S]+?)(?:\[|\n#|$)/
+        );
+        if (contentText) section.content = contentText[1].trim();
+      }
+
+      if (section.section === 3) {
+        const cards = [
+          ...rawSection.matchAll(
+            /!\[.*\]\((.+?)\)[\s\S]+?\*\*Conteúdo:\*\* (.+)/g
+          ),
+        ];
+        section.cards = cards.map(([, image, content]) => ({
+          image,
+          content: content.trim(),
+        }));
+      }
+
+      if (section.section === 5) {
+        const buttons = [
+          ...rawSection.matchAll(
+            /\[\*\*(.+?)\*\*\]\((mailto:|https:\/\/wa\.me)(.+?)\)/g
+          ),
+        ];
+        section.buttons = buttons.map(
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          ([_, content, typePrefix, linkSuffix]) => ({
+            content,
+            link: `${typePrefix}${linkSuffix}`,
+            type: typePrefix.includes("wa.me") ? "whatsapp" : "email",
+          })
+        );
+      }
+
+      return section;
+    });
+  }
+
+  const sections = parseMarkdownToSections(mdString.parent);
+  console.log(sections);
   return (
     <>
       <main className="">
-        {sections.map((section: Sections) => {
+        {sections.map((section: Section) => {
           switch (section.section) {
             case 1:
               return (
@@ -55,13 +126,24 @@ export default async function Home() {
                       />
                     )}
                     <div className="flex flex-col gap-4 md:gap-2 items-center">
-                      {section.content.map((p, index) => (
+                      {Array.isArray(section?.content) ? (
+                        section.content.map(
+                          (p: any, index: Key | null | undefined) => (
+                            <p
+                              key={index}
+                              className="text-primary"
+                              dangerouslySetInnerHTML={{ __html: p }}
+                            />
+                          )
+                        )
+                      ) : (
                         <p
-                          key={index}
                           className="text-primary"
-                          dangerouslySetInnerHTML={{ __html: p }}
+                          dangerouslySetInnerHTML={{
+                            __html: section?.content || "",
+                          }}
                         />
-                      ))}
+                      )}
                     </div>
                   </div>
                 </section>
