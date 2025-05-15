@@ -7,13 +7,11 @@ import { Whatsapp } from "./ui/components/whatsapp";
 import type { Key } from "react";
 
 export default async function Home() {
-  const mdBlocks = await n2m.pageToMarkdown(
-    "1f034ae0-7f65-81f6-bcaa-f1d1628f012a"
-  );
+  const mdBlocks = await n2m.pageToMarkdown(process.env.NOTION_PAGE ?? "");
   const mdString = n2m.toMarkdownString(mdBlocks);
 
   function parseMarkdownToSections(markdown: string): Section[] {
-    const sections = markdown.split(/^---$/m); // separa pelas linhas '---'
+    const sections = markdown.split(/^---$/m);
 
     return sections.map((rawSection) => {
       const section: Section = {
@@ -258,3 +256,4 @@ export default async function Home() {
     </>
   );
 }
+export const revalidate = 60;
