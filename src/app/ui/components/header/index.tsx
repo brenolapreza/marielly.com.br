@@ -1,31 +1,23 @@
-import Image from "next/image";
 import Link from "next/link";
+import type { SiteContent } from "../../../lib/content";
 
-export const Header = () => {
+export function Header({ content }: { content: SiteContent }) {
   return (
-    <header className="w-full h-20 sticky top-0 bg-primary-200">
-      <div className="container flex items-center justify-between h-full">
-        <div className="">
-          <Image
-            src="/logo.svg"
-            alt="Next.js logo"
-            width={60}
-            height={62}
-            priority
-          />
-        </div>
-        <ul className="flex md:gap-8 gap-3 md:text-[16px] text-[14px]">
-          <li>
-            <Link href="#home">Home</Link>
-          </li>
-          <li>
-            <Link href="#terapia">Terapia online</Link>
-          </li>
-          <li>
-            <Link href="#contato">Contato</Link>
-          </li>
-        </ul>
+    <header className="site-header">
+      <div className="container header-inner">
+        <Link className="brand" href="/#home" aria-label={`Ir para o início — ${content.brand.name}`}>
+          <span className="brand-mark">{content.brand.shortName}</span>
+          <span className="brand-copy">
+            <strong>{content.brand.name}</strong>
+            <small>{content.brand.role}</small>
+          </span>
+        </Link>
+        <nav className="main-nav" aria-label="Navegação principal">
+          <Link href="/sobre-mim">{content.navigation.aboutLabel}</Link>
+          <Link href="/#processo">{content.navigation.methodLabel}</Link>
+          <Link className="nav-contact" href="/#contato">{content.navigation.contactLabel}</Link>
+        </nav>
       </div>
     </header>
   );
-};
+}

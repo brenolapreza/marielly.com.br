@@ -1,0 +1,105 @@
+{
+  "brand": {
+    "name": "Marielly Lapreza",
+    "shortName": "ML",
+    "role": "Psicóloga clínica"
+  },
+  "seo": {
+    "title": "Marielly Lapreza | Psicologia clínica online",
+    "description": "Acolhimento e psicoterapia online para você se escutar com mais calma, clareza e presença."
+  },
+  "navigation": {
+    "aboutLabel": "Sobre mim",
+    "methodLabel": "Como funciona",
+    "contactLabel": "Contato"
+  },
+  "hero": {
+    "eyebrow": "Psicologia clínica online",
+    "title": "Um espaço seguro para você voltar a si.",
+    "highlight": "voltar a si",
+    "description": "A psicoterapia pode ser um lugar de pausa, escuta e cuidado — no seu ritmo e com acolhimento de verdade.",
+    "primaryButtonLabel": "Agendar conversa",
+    "primaryButtonUrl": "https://wa.me/5511999999999",
+    "secondaryButtonLabel": "Conhecer meu trabalho",
+    "image": "/marielly.png",
+    "imageAlt": "Marielly Lapreza, psicóloga clínica"
+  },
+  "about": {
+    "eyebrow": "Sobre mim",
+    "title": "Cuidar da mente também é aprender a se ouvir.",
+    "paragraphs": [
+      "Sou Marielly, psicóloga clínica, e acredito em uma psicoterapia construída com presença, respeito e parceria.",
+      "Meu trabalho é oferecer um espaço acolhedor para você compreender o que sente, encontrar novos caminhos e viver com mais leveza."
+    ],
+    "image": "/image_help-01.png",
+    "imageAlt": "Atendimento de psicoterapia online"
+  },
+  "aboutPage": {
+    "eyebrow": "Prazer, eu sou a Marielly",
+    "title": "Uma pessoa inteira por trás da profissional.",
+    "intro": "Conheça um pouco da minha história, dos valores que me acompanham e do caminho que me trouxe até a psicologia clínica.",
+    "personalTitle": "Quem existe além do consultório",
+    "personalParagraphs": [
+      "Este espaço é para compartilhar, com a minha própria voz, as experiências, relações e valores que também fazem parte de quem sou.",
+      "Aos poucos, vou contar mais sobre a minha vida pessoal e sobre o que me inspira a cuidar de pessoas com presença e sensibilidade."
+    ],
+    "professionalTitle": "Minha trajetória profissional",
+    "professionalParagraphs": [
+      "Sou Marielly, psicóloga clínica, e construo meu trabalho com escuta, acolhimento e respeito pela singularidade de cada história.",
+      "Na psicoterapia, ofereço um espaço seguro para compreender o que você sente, encontrar novos caminhos e caminhar no seu ritmo."
+    ],
+    "image": "/marielly.png",
+    "imageAlt": "Marielly Lapreza, psicóloga clínica"
+  },
+  "method": {
+    "eyebrow": "Um processo possível",
+    "title": "Terapia com acolhimento e direção.",
+    "description": "Cada processo é único. Juntos, vamos construir um caminho que faça sentido para a sua história.",
+    "cards": [
+      {
+        "title": "Escuta sem julgamentos",
+        "description": "Um espaço para falar com liberdade e ser acolhido como você é.",
+        "details": "Na terapia, você encontra um lugar de escuta atenta, sem pressa e sem julgamentos. Falar sobre o que acontece por dentro pode ajudar a organizar sentimentos, reconhecer necessidades e construir uma relação mais cuidadosa consigo.",
+        "image": "/image_help-02.png",
+        "imageAlt": "Mãos acolhendo durante uma conversa"
+      },
+      {
+        "title": "Clareza para o presente",
+        "description": "Vamos olhar para pensamentos, emoções e comportamentos com mais gentileza.",
+        "details": "Juntos, vamos observar pensamentos, emoções e comportamentos que aparecem no seu dia a dia. Com mais clareza, fica possível compreender padrões, fazer escolhas conscientes e encontrar respostas que respeitem o momento que você está vivendo.",
+        "image": "/image_help-01.png",
+        "imageAlt": "Pessoa em atendimento online"
+      },
+      {
+        "title": "Mudanças no seu ritmo",
+        "description": "Pequenos passos consistentes podem abrir espaço para uma vida mais alinhada.",
+        "details": "Cada pessoa tem seu tempo, seus limites e seus recursos. O processo terapêutico não precisa ser uma corrida: ele pode acontecer em passos possíveis, celebrando descobertas e mudanças que façam sentido para a sua realidade.",
+        "image": "/marielly.png",
+        "imageAlt": "Marielly Lapreza em seu espaço de trabalho"
+      }
+    ]
+  },
+  "contact": {
+    "eyebrow": "Vamos conversar?",
+    "title": "Seu próximo passo pode começar com uma mensagem.",
+    "description": "Se você sente que é hora de olhar para si com mais cuidado, estou aqui para te ouvir.",
+    "whatsappLabel": "Falar pelo WhatsApp",
+    "whatsappUrl": "https://wa.me/5511999999999",
+    "emailLabel": "Enviar e-mail",
+    "emailUrl": "mailto:contato@mariellylapreza.com.br"
+  },
+  "footer": {
+    "description": "Psicologia clínica online com acolhimento, presença e respeito à sua história.",
+    "instagramUrl": "https://instagram.com/"
+  },
+  "colors": {
+    "background": "#F6F2EC",
+    "surface": "#E7DED1",
+    "ink": "#2D302A",
+    "muted": "#687067",
+    "accent": "#A4752A",
+    "sage": "#85927D",
+    "line": "#D8CFC3",
+    "whatsapp": "#25D366"
+  }
+}
