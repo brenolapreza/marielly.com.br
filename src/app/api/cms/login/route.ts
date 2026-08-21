@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { createCmsSession, isValidCmsCredentials } from "../../../lib/auth";
 
+export const runtime = "nodejs";
+
 type Attempt = { count: number; firstAttemptAt: number };
 const attempts = new Map<string, Attempt>();
 const WINDOW_MS = 10 * 60 * 1000;

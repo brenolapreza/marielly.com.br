@@ -5,6 +5,7 @@ import { NextResponse } from "next/server";
 import { hasCmsSession } from "../../../lib/auth";
 
 export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
 const MAX_FILE_SIZE = 8 * 1024 * 1024;
 const extensions: Record<string, string> = {

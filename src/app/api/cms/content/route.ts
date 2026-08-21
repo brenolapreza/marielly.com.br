@@ -3,6 +3,7 @@ import { hasCmsSession } from "../../../lib/auth";
 import { getSiteContent, saveSiteContent } from "../../../lib/content";
 
 export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
 export async function GET() {
   if (!(await hasCmsSession())) return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
