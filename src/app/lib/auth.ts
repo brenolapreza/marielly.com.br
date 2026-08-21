@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 const SESSION_COOKIE = "marielly_cms_session";
 const SESSION_TTL_SECONDS = 60 * 60 * 8;
 const CMS_USERNAME = "mlapreza";
-const PASSWORD_HASH = "scrypt$16384$8$1$0qxATrWDbikhWozyoX355A$hI33BjpPsC8-y-OkGc2NMRO_GR_lqeJVJJrckFyjRouLIGwMTT1VBnFyPSvfzSFdYj3cdgw02vyZbPQnoojubA";
+const PASSWORD_HASH = "scrypt$16384$8$1$cmhvD5P5RfJZucUWBHiiMw$Q6ZPErykMqEWo3v045nyHcg1RYx4DKQMVa-HWGPSnl_9F3rZySngciy1DHvjaw8fyD_2Dm3Lt0fVHwtlkVAVug";
 const FALLBACK_SECRET = "marielly-cms-local-session-secret-change-in-production";
 
 function sessionSecret() {
