@@ -40,7 +40,7 @@ export function CmsLogin() {
           {error && <p className="cms-login-error" role="alert">{error}</p>}
           <button className="cms-login-button" type="submit" disabled={loading}>{loading ? "Entrando..." : "Acessar configuração"}</button>
         </form>
-        <Link className="cms-back" href="/">← Voltar para o site</Link>
+        <Link className="cms-back" href="/">Voltar para o site</Link>
       </section>
     </main>
   );

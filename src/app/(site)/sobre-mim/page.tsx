@@ -36,7 +36,7 @@ export default async function AboutPage() {
           <p className="eyebrow">{content.aboutPage.eyebrow}</p>
           <h1>{content.aboutPage.title}</h1>
           <p className="about-page-intro">{content.aboutPage.intro}</p>
-          <Link className="text-link" href="/#contato">Vamos conversar <span aria-hidden="true">↗</span></Link>
+          <Link className="text-link" href="/#contato">Vamos conversar</Link>
         </div>
         <div className="about-page-visual image-frame">
           <img src={content.aboutPage.image} alt={content.aboutPage.imageAlt} fetchPriority="high" />
@@ -67,14 +67,14 @@ export default async function AboutPage() {
           <p className="eyebrow">Um próximo passo possível</p>
           <h2>Se fizer sentido para você, podemos conversar.</h2>
         </div>
-        <Link className="button button-primary" href="/#contato">Entrar em contato <span aria-hidden="true">↗</span></Link>
+        <Link className="button button-primary" href="/#contato">Entrar em contato</Link>
       </section>
 
       <footer className="site-footer">
         <div className="container footer-inner">
           <div><span className="brand-mark footer-mark">{content.brand.shortName}</span><span>{content.brand.name}</span></div>
           <p>{content.footer.description}</p>
-          <a href={content.footer.instagramUrl} className="footer-social" target="_blank" rel="noreferrer">Instagram ↗</a>
+          <a href={content.footer.instagramUrl} className="footer-social" target="_blank" rel="noreferrer">Instagram</a>
         </div>
         <div className="container footer-bottom"><span>© {new Date().getFullYear()} {content.brand.name}</span><span>{content.brand.role}</span></div>
       </footer>

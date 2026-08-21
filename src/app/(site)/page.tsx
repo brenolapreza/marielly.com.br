@@ -37,8 +37,8 @@ export default async function Home() {
           <h1><HighlightedTitle title={content.hero.title} highlight={content.hero.highlight} /></h1>
           <p className="hero-description">{content.hero.description}</p>
           <div className="hero-actions">
-            <ExternalLink href={content.hero.primaryButtonUrl} className="button button-primary">{content.hero.primaryButtonLabel}<span aria-hidden="true">↗</span></ExternalLink>
-            <a className="text-link" href="#sobre">{content.hero.secondaryButtonLabel}<span aria-hidden="true">↓</span></a>
+            <ExternalLink href={content.hero.primaryButtonUrl} className="button button-primary">{content.hero.primaryButtonLabel}</ExternalLink>
+            <a className="text-link" href="#sobre">{content.hero.secondaryButtonLabel}</a>
           </div>
           <div className="hero-note"><span className="note-dot" /> Atendimento individual, 100% online</div>
         </div>
@@ -65,7 +65,7 @@ export default async function Home() {
           <p className="eyebrow">{content.about.eyebrow}</p>
           <h2>{content.about.title}</h2>
           {content.about.paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
-          <a className="text-link" href="/sobre-mim">Conheça minha história <span aria-hidden="true">↗</span></a>
+          <a className="text-link" href="/sobre-mim">Conheça minha história</a>
         </div>
       </section>
 
@@ -83,7 +83,7 @@ export default async function Home() {
       <section className="contact-section container" id="contato">
         <div className="contact-inner">
           <div><p className="eyebrow">{content.contact.eyebrow}</p><h2>{content.contact.title}</h2></div>
-          <div className="contact-copy"><p>{content.contact.description}</p><div className="contact-actions"><ExternalLink href={content.contact.whatsappUrl} className="button button-light">{content.contact.whatsappLabel}<span aria-hidden="true">↗</span></ExternalLink><ExternalLink href={content.contact.emailUrl} className="contact-email">{content.contact.emailLabel}</ExternalLink></div></div>
+          <div className="contact-copy"><p>{content.contact.description}</p><div className="contact-actions"><ExternalLink href={content.contact.whatsappUrl} className="button button-light">{content.contact.whatsappLabel}</ExternalLink><ExternalLink href={content.contact.emailUrl} className="contact-email">{content.contact.emailLabel}</ExternalLink></div></div>
         </div>
       </section>
 
@@ -91,7 +91,7 @@ export default async function Home() {
         <div className="container footer-inner">
           <div><span className="brand-mark footer-mark">{content.brand.shortName}</span><span>{content.brand.name}</span></div>
           <p>{content.footer.description}</p>
-          <ExternalLink href={content.footer.instagramUrl} className="footer-social">Instagram ↗</ExternalLink>
+          <ExternalLink href={content.footer.instagramUrl} className="footer-social">Instagram</ExternalLink>
         </div>
         <div className="container footer-bottom"><span>© {new Date().getFullYear()} {content.brand.name}</span><span>Psicologia clínica online</span></div>
       </footer>

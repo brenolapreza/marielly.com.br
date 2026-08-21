@@ -35,7 +35,7 @@ function ImageField({ id, label, value, onChange }: { id: string; label: string;
     }
   }
 
-  return <div className="cms-image-field"><Field label={label} value={value} onChange={onChange} /><div className="cms-upload-row"><label className="cms-upload-button" htmlFor={id}>{uploading ? "Enviando..." : "Enviar imagem"}<input id={id} type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/avif" onChange={upload} disabled={uploading} /></label><span>JPG, PNG ou WebP · até 8 MB</span></div>{error && <small className="cms-upload-error">{error}</small>}</div>;
+  return <div className="cms-image-field"><Field label={label} value={value} onChange={onChange} /><div className="cms-upload-row"><label className="cms-upload-button" htmlFor={id}>{uploading ? "Enviando..." : "Enviar imagem"}<input id={id} type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/avif" onChange={upload} disabled={uploading} /></label><span>JPG, PNG ou WebP - até 8 MB</span></div>{error && <small className="cms-upload-error">{error}</small>}</div>;
 }
 
 export function CmsEditor({ initialContent }: { initialContent: SiteContent }) {
@@ -76,7 +76,7 @@ export function CmsEditor({ initialContent }: { initialContent: SiteContent }) {
 
   return (
     <main className="cms-shell">
-      <header className="cms-topbar"><div className="cms-brand"><span className="cms-brand-mark">ML</span><span>Configuração do site</span></div><div className="cms-top-actions"><Link href="/" target="_blank">Ver site ↗</Link><button className="cms-logout" onClick={logout}>Sair</button></div></header>
+      <header className="cms-topbar"><div className="cms-brand"><span className="cms-brand-mark">ML</span><span>Configuração do site</span></div><div className="cms-top-actions"><Link href="/" target="_blank">Ver site</Link><button className="cms-logout" onClick={logout}>Sair</button></div></header>
       <div className="cms-content">
         <div className="cms-heading"><div><h1>Seu espaço de edição.</h1><p>Atualize o que aparece no site. As mudanças são salvas quando você clicar no botão.</p></div><button className="cms-save" onClick={save} disabled={saving}>{saving ? "Salvando..." : "Salvar alterações"}</button></div>
         {notice && <p className={`cms-notice${error ? " error" : ""}`} role="status">{notice}</p>}

@@ -39,7 +39,7 @@ export function MethodCards({ cards }: { cards: SiteContent["method"]["cards"] }
               <h3>{card.title}</h3>
               <p>{card.description}</p>
               <button className="card-more" type="button" onClick={() => setActiveIndex(index)} aria-haspopup="dialog">
-                Entenda este passo <span aria-hidden="true">↗</span>
+                Entenda este passo
               </button>
               <div className="method-card-seo-copy" aria-hidden="true"><p>{card.details}</p></div>
             </div>
@@ -50,12 +50,12 @@ export function MethodCards({ cards }: { cards: SiteContent["method"]["cards"] }
       {activeCard && (
         <div className="method-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setActiveIndex(null); }}>
           <section className="method-modal" role="dialog" aria-modal="true" aria-labelledby="method-modal-title" tabIndex={-1}>
-            <button ref={closeButtonRef} className="method-modal-close" type="button" onClick={() => setActiveIndex(null)} aria-label="Fechar explicação">×</button>
+            <button ref={closeButtonRef} className="method-modal-close" type="button" onClick={() => setActiveIndex(null)} aria-label="Fechar explicação"><span className="method-modal-close-icon" aria-hidden="true" /></button>
             <span className="card-number">0{(activeIndex ?? 0) + 1} / como funciona</span>
             <h2 id="method-modal-title">{activeCard.title}</h2>
             <p className="method-modal-lead">{activeCard.description}</p>
             <p>{activeCard.details}</p>
-            <button className="button button-primary method-modal-action" type="button" onClick={() => setActiveIndex(null)}>Voltar aos passos <span aria-hidden="true">↓</span></button>
+            <button className="button button-primary method-modal-action" type="button" onClick={() => setActiveIndex(null)}>Voltar aos passos</button>
           </section>
         </div>
       )}
