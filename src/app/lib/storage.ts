@@ -1,6 +1,14 @@
 import { BlobPreconditionFailedError, get, put } from "@vercel/blob";
 
-const blobToken = () => process.env.BLOB_READ_WRITE_TOKEN;
+const blobToken = () => process.env.BLOB_READ_WRITE_TOKEN || process.env.BLOB_READ_WRITE_TOKEN_READ_WRITE_TOKEN;
+const blobStoreId = () => process.env.BLOB_STORE_ID || process.env.BLOB_READ_WRITE_TOKEN_STORE_ID;
+
+function blobOptions() {
+  return {
+    token: blobToken(),
+    storeId: blobStoreId()
+  };
+}
 
 export class CmsStorageNotConfiguredError extends Error {
   constructor() {
@@ -29,7 +37,7 @@ export function assertProductionStorage() {
 export async function readPublicBlob(pathname: string) {
   const result = await get(pathname, {
     access: "public",
-    token: blobToken(),
+    ...blobOptions(),
     useCache: false
   });
 
@@ -41,7 +49,7 @@ export async function writePublicBlob(pathname: string, body: string, etag?: str
   try {
     return await put(pathname, body, {
       access: "public",
-      token: blobToken(),
+      ...blobOptions(),
       contentType: "application/json; charset=utf-8",
       cacheControlMaxAge: 60,
       allowOverwrite: true,
@@ -58,7 +66,7 @@ export async function writePublicBlob(pathname: string, body: string, etag?: str
 export async function uploadPublicBlob(pathname: string, body: File) {
   return put(pathname, body, {
     access: "public",
-    token: blobToken(),
+    ...blobOptions(),
     contentType: body.type,
     cacheControlMaxAge: 31536000,
     allowOverwrite: false
