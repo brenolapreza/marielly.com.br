@@ -40,4 +40,11 @@ npm run start
 
 ## Deploy on Vercel
 
-Before deploying the CMS, configure `CMS_SESSION_SECRET` as an environment variable in the Vercel project for the target environment. Use a random value with at least 32 characters and redeploy after changing it.
+Before deploying the CMS:
+
+1. Create a **public** Vercel Blob store connected to the project. The store is used for the editable JSON and public site images.
+2. Add `BLOB_READ_WRITE_TOKEN` to the Vercel project's Production environment. Creating the store from the project's Storage tab adds this variable automatically.
+3. Add `CMS_SESSION_SECRET` with a random value of at least 32 characters.
+4. Redeploy after changing environment variables.
+
+The CMS uses the local JSON and `public/uploads` only during development. In production, content and new images are stored in Vercel Blob because a Vercel Function cannot persist writes to the deployed filesystem.

@@ -1,5 +1,6 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
+import { assertProductionStorage, hasBlobStorage, readPublicBlob, writePublicBlob } from "./storage";
 
 export type SiteContent = {
   brand: {
@@ -157,6 +158,7 @@ const defaultSiteContent: SiteContent = {
 };
 
 const contentPath = path.join(process.cwd(), "content", "site-content.json");
+const contentBlobPath = "cms/site-content.json";
 const textLimit = (value: unknown, fallback: string, max = 500) =>
   typeof value === "string" && value.trim() ? value.trim().slice(0, max) : fallback;
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -283,6 +285,15 @@ function normalizeContent(input: unknown): SiteContent {
 }
 
 export async function getSiteContent(): Promise<SiteContent> {
+  if (hasBlobStorage()) {
+    try {
+      const blob = await readPublicBlob(contentBlobPath);
+      if (blob) return normalizeContent(JSON.parse(blob.text));
+    } catch {
+      // Keep the bundled content available if Blob is temporarily unreachable.
+    }
+  }
+
   try {
     const file = await fs.readFile(contentPath, "utf8");
     return normalizeContent(JSON.parse(file));
@@ -293,7 +304,17 @@ export async function getSiteContent(): Promise<SiteContent> {
 
 export async function saveSiteContent(input: unknown): Promise<SiteContent> {
   const nextContent = normalizeContent(input);
+  assertProductionStorage();
+
+  if (hasBlobStorage()) {
+    const previous = await readPublicBlob(contentBlobPath);
+    await writePublicBlob(contentBlobPath, `${JSON.stringify(nextContent, null, 2)}\n`, previous?.etag);
+    return nextContent;
+  }
+
   await fs.mkdir(path.dirname(contentPath), { recursive: true });
-  await fs.writeFile(contentPath, `${JSON.stringify(nextContent, null, 2)}\n`, { encoding: "utf8", mode: 0o600 });
+  const temporaryPath = `${contentPath}.tmp`;
+  await fs.writeFile(temporaryPath, `${JSON.stringify(nextContent, null, 2)}\n`, { encoding: "utf8", mode: 0o600 });
+  await fs.rename(temporaryPath, contentPath);
   return nextContent;
 }
