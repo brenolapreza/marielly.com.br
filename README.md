@@ -48,3 +48,5 @@ Before deploying the CMS:
 4. Redeploy after changing environment variables.
 
 The CMS uses the local JSON and `public/uploads` only during development. In production, content and new images are stored in Vercel Blob because a Vercel Function cannot persist writes to the deployed filesystem.
+
+Atualização de deploy: 31/08/2026.
