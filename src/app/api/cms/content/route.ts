@@ -1,29 +1,34 @@
 import { NextResponse } from "next/server";
-import { hasCmsSession } from "../../../lib/auth";
+import { cmsErrorResponse, requireCmsSession } from "../../../lib/cms-errors";
 import { getSiteContent, saveSiteContent } from "../../../lib/content";
-import { CmsContentConflictError, CmsStorageNotConfiguredError } from "../../../lib/storage";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 export async function GET() {
-  if (!(await hasCmsSession())) return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
+  const sessionError = await requireCmsSession();
+  if (sessionError) return sessionError;
   return NextResponse.json(await getSiteContent(), { headers: { "Cache-Control": "no-store" } });
 }
 
 export async function PUT(request: Request) {
-  if (!(await hasCmsSession())) return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
+  const sessionError = await requireCmsSession();
+  if (sessionError) return sessionError;
+
+  let body: unknown;
   try {
-    const body = await request.json();
+    body = await request.json();
+  } catch {
+    return NextResponse.json(
+      { error: "Os dados enviados pelo painel estão inválidos. Recarregue a página e tente novamente.", code: "CMS_INVALID_JSON" },
+      { status: 400, headers: { "Cache-Control": "no-store" } }
+    );
+  }
+
+  try {
     const content = await saveSiteContent(body);
     return NextResponse.json({ ok: true, content }, { headers: { "Cache-Control": "no-store" } });
   } catch (error) {
-    if (error instanceof CmsStorageNotConfiguredError) {
-      return NextResponse.json({ error: "O armazenamento do CMS ainda não foi configurado em produção." }, { status: 503 });
-    }
-    if (error instanceof CmsContentConflictError) {
-      return NextResponse.json({ error: error.message }, { status: 409 });
-    }
-    return NextResponse.json({ error: "Não foi possível salvar agora." }, { status: 500 });
+    return cmsErrorResponse("content.save", error, "Não foi possível salvar as alterações.");
   }
 }

@@ -7,6 +7,19 @@ import type { SiteContent } from "../lib/content";
 
 type SectionKey = "brand" | "seo" | "navigation" | "hero" | "about" | "aboutPage" | "method" | "contact" | "footer" | "colors";
 
+function apiErrorMessage(body: unknown, fallback: string, status: number) {
+  const payload = body && typeof body === "object" ? body as { error?: unknown; code?: unknown; reference?: unknown } : {};
+  const message = typeof payload.error === "string" ? payload.error : `${fallback} (HTTP ${status}).`;
+  const code = typeof payload.code === "string" ? ` Código: ${payload.code}.` : "";
+  const reference = typeof payload.reference === "string" ? ` Referência: ${payload.reference}.` : "";
+  return `${message}${code}${reference}`;
+}
+
+function clientErrorMessage(error: unknown, fallback: string) {
+  if (error instanceof TypeError) return "Não foi possível conectar ao CMS. Verifique sua internet e tente novamente.";
+  return error instanceof Error ? error.message : fallback;
+}
+
 function Field({ label, value, onChange, multiline = false, type = "text", placeholder }: { label: string; value: string; onChange: (value: string) => void; multiline?: boolean; type?: string; placeholder?: string }) {
   return <div className="cms-field"><label>{label}</label>{multiline ? <textarea value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} /> : <input type={type} value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} />}</div>;
 }
@@ -25,10 +38,10 @@ function ImageField({ id, label, value, onChange }: { id: string; label: string;
       formData.append("image", file);
       const response = await fetch("/api/cms/upload", { method: "POST", body: formData });
       const body = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(body.error || "Não foi possível enviar a imagem.");
+      if (!response.ok) throw new Error(apiErrorMessage(body, "Não foi possível enviar a imagem.", response.status));
       onChange(body.url);
     } catch (uploadError) {
-      setError(uploadError instanceof Error ? uploadError.message : "Não foi possível enviar a imagem.");
+      setError(clientErrorMessage(uploadError, "Não foi possível enviar a imagem."));
     } finally {
       setUploading(false);
       event.target.value = "";
@@ -61,11 +74,11 @@ export function CmsEditor({ initialContent }: { initialContent: SiteContent }) {
     try {
       const response = await fetch("/api/cms/content", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(content) });
       const body = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(body.error || "Não foi possível salvar.");
+      if (!response.ok) throw new Error(apiErrorMessage(body, "Não foi possível salvar as alterações.", response.status));
       setContent(body.content);
       setNotice("Alterações salvas. O site público já está atualizado.");
     } catch (saveError) {
-      setError(true); setNotice(saveError instanceof Error ? saveError.message : "Não foi possível salvar agora.");
+      setError(true); setNotice(clientErrorMessage(saveError, "Não foi possível conectar ao CMS. Tente novamente."));
     } finally { setSaving(false); }
   }
 

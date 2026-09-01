@@ -2,8 +2,8 @@ import crypto from "node:crypto";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import { NextResponse } from "next/server";
-import { hasCmsSession } from "../../../lib/auth";
-import { assertProductionStorage, hasBlobStorage, uploadPublicBlob, CmsStorageNotConfiguredError } from "../../../lib/storage";
+import { cmsErrorResponse, requireCmsSession } from "../../../lib/cms-errors";
+import { assertProductionStorage, hasBlobStorage, uploadPublicBlob } from "../../../lib/storage";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -18,7 +18,8 @@ const extensions: Record<string, string> = {
 };
 
 export async function POST(request: Request) {
-  if (!(await hasCmsSession())) return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
+  const sessionError = await requireCmsSession();
+  if (sessionError) return sessionError;
 
   try {
     const formData = await request.formData();
@@ -45,9 +46,6 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ ok: true, url: `/uploads/${filename}`, filename }, { headers: { "Cache-Control": "no-store" } });
   } catch (error) {
-    if (error instanceof CmsStorageNotConfiguredError) {
-      return NextResponse.json({ error: "O armazenamento do CMS ainda não foi configurado em produção." }, { status: 503 });
-    }
-    return NextResponse.json({ error: "Não foi possível enviar essa imagem agora." }, { status: 500 });
+    return cmsErrorResponse("upload", error, "Não foi possível enviar essa imagem.");
   }
 }

@@ -7,9 +7,18 @@ const CMS_USERNAME = "mlapreza";
 const PASSWORD_HASH = "scrypt$16384$8$1$cmhvD5P5RfJZucUWBHiiMw$Q6ZPErykMqEWo3v045nyHcg1RYx4DKQMVa-HWGPSnl_9F3rZySngciy1DHvjaw8fyD_2Dm3Lt0fVHwtlkVAVug";
 const FALLBACK_SECRET = "marielly-cms-local-session-secret-change-in-production";
 
+export class CmsAuthConfigurationError extends Error {
+  readonly code = "CMS_AUTH_NOT_CONFIGURED";
+
+  constructor() {
+    super("CMS_SESSION_SECRET precisa ser configurada em produção.");
+    this.name = "CmsAuthConfigurationError";
+  }
+}
+
 function sessionSecret() {
   if (process.env.NODE_ENV === "production" && !process.env.CMS_SESSION_SECRET) {
-    throw new Error("CMS_SESSION_SECRET precisa ser configurada em produção.");
+    throw new CmsAuthConfigurationError();
   }
   return process.env.CMS_SESSION_SECRET || FALLBACK_SECRET;
 }

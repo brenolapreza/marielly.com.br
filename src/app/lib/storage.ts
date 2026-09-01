@@ -1,3 +1,4 @@
+import crypto from "node:crypto";
 import { BlobPreconditionFailedError, get, put } from "@vercel/blob";
 
 const blobToken = () => process.env.BLOB_READ_WRITE_TOKEN || process.env.BLOB_READ_WRITE_TOKEN_READ_WRITE_TOKEN;
@@ -11,6 +12,8 @@ function blobOptions() {
 }
 
 export class CmsStorageNotConfiguredError extends Error {
+  readonly code = "CMS_STORAGE_NOT_CONFIGURED";
+
   constructor() {
     super("Configure o armazenamento do CMS antes de salvar em produção.");
     this.name = "CmsStorageNotConfiguredError";
@@ -18,10 +21,85 @@ export class CmsStorageNotConfiguredError extends Error {
 }
 
 export class CmsContentConflictError extends Error {
+  readonly code = "CMS_CONTENT_CONFLICT";
+
   constructor() {
     super("O conteúdo foi alterado em outra sessão. Recarregue a página e tente novamente.");
     this.name = "CmsContentConflictError";
   }
+}
+
+export type CmsStorageErrorCode = "CMS_BLOB_TOKEN" | "CMS_BLOB_STORE" | "CMS_BLOB_ACCESS" | "CMS_BLOB_UNAVAILABLE" | "CMS_BLOB_UNKNOWN";
+
+export class CmsStorageOperationError extends Error {
+  constructor(
+    readonly code: CmsStorageErrorCode,
+    message: string,
+    readonly statusCode: 502 | 503,
+    readonly reference: string
+  ) {
+    super(message);
+    this.name = "CmsStorageOperationError";
+  }
+}
+
+function safeErrorMessage(error: unknown) {
+  const message = error instanceof Error ? error.message : String(error);
+  return message.replace(/Bearer\s+\S+/gi, "Bearer [redacted]").replace(/vercel_blob_[\w-]+/gi, "[redacted]");
+}
+
+export function logCmsError(scope: string, error: unknown) {
+  const reference = crypto.randomUUID().slice(0, 8);
+  const details = error instanceof Error ? { name: error.name, message: safeErrorMessage(error), stack: error.stack } : { name: "UnknownError", message: safeErrorMessage(error) };
+  console.error(`[CMS ${scope}] ${reference}`, details);
+  return reference;
+}
+
+function storageOperationError(scope: string, error: unknown) {
+  if (error instanceof CmsStorageOperationError) return error;
+
+  const reference = logCmsError(scope, error);
+  const name = error instanceof Error ? error.name : "";
+  const message = safeErrorMessage(error).toLowerCase();
+
+  if (name === "BlobClientTokenExpiredError" || message.includes("token") || message.includes("unauthorized")) {
+    return new CmsStorageOperationError(
+      "CMS_BLOB_TOKEN",
+      "O token do Vercel Blob foi rejeitado. Confirme se o token completo está na variável de Produção e não foi cadastrado como ********.",
+      503,
+      reference
+    );
+  }
+  if (name === "BlobStoreNotFoundError" || name === "BlobStoreSuspendedError" || message.includes("store not found")) {
+    return new CmsStorageOperationError(
+      "CMS_BLOB_STORE",
+      "A Blob Store não foi encontrada ou está suspensa. Confira o Store ID e se a variável está no projeto correto.",
+      503,
+      reference
+    );
+  }
+  if (name === "BlobAccessError" || message.includes("forbidden") || message.includes("public")) {
+    return new CmsStorageOperationError(
+      "CMS_BLOB_ACCESS",
+      "O Blob recusou o acesso. Esta aplicação precisa de uma Blob Store pública ligada a esse token.",
+      503,
+      reference
+    );
+  }
+  if (name === "BlobServiceNotAvailable" || name === "BlobServiceRateLimited" || message.includes("rate limit") || message.includes("temporarily")) {
+    return new CmsStorageOperationError(
+      "CMS_BLOB_UNAVAILABLE",
+      "O Vercel Blob está temporariamente indisponível ou atingiu um limite. Tente novamente em alguns instantes.",
+      503,
+      reference
+    );
+  }
+  return new CmsStorageOperationError(
+    "CMS_BLOB_UNKNOWN",
+    "Falha técnica ao acessar o Vercel Blob. Consulte os logs da Vercel para a referência informada.",
+    502,
+    reference
+  );
 }
 
 export function hasBlobStorage() {
@@ -35,14 +113,18 @@ export function assertProductionStorage() {
 }
 
 export async function readPublicBlob(pathname: string) {
-  const result = await get(pathname, {
-    access: "public",
-    ...blobOptions(),
-    useCache: false
-  });
+  try {
+    const result = await get(pathname, {
+      access: "public",
+      ...blobOptions(),
+      useCache: false
+    });
 
-  if (!result || result.statusCode !== 200) return null;
-  return { text: await new Response(result.stream).text(), etag: result.blob.etag };
+    if (!result || result.statusCode !== 200) return null;
+    return { text: await new Response(result.stream).text(), etag: result.blob.etag };
+  } catch (error) {
+    throw storageOperationError("storage.read", error);
+  }
 }
 
 export async function writePublicBlob(pathname: string, body: string, etag?: string) {
@@ -59,16 +141,20 @@ export async function writePublicBlob(pathname: string, body: string, etag?: str
     if (error instanceof BlobPreconditionFailedError) {
       throw new CmsContentConflictError();
     }
-    throw error;
+    throw storageOperationError("storage.write", error);
   }
 }
 
 export async function uploadPublicBlob(pathname: string, body: File) {
-  return put(pathname, body, {
-    access: "public",
-    ...blobOptions(),
-    contentType: body.type,
-    cacheControlMaxAge: 31536000,
-    allowOverwrite: false
-  });
+  try {
+    return await put(pathname, body, {
+      access: "public",
+      ...blobOptions(),
+      contentType: body.type,
+      cacheControlMaxAge: 31536000,
+      allowOverwrite: false
+    });
+  } catch (error) {
+    throw storageOperationError("storage.upload", error);
+  }
 }
