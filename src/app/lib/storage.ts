@@ -5,6 +5,12 @@ const blobToken = () => process.env.BLOB_READ_WRITE_TOKEN || process.env.BLOB_RE
 const blobStoreId = () => process.env.BLOB_STORE_ID || process.env.BLOB_READ_WRITE_TOKEN_STORE_ID;
 type BlobAccess = "public" | "private";
 
+function preferredBlobAccess(): BlobAccess {
+  if (process.env.BLOB_ACCESS === "private") return "private";
+  if (process.env.BLOB_ACCESS === "public") return "public";
+  return process.env.BLOB_READ_WRITE_TOKEN_READ_WRITE_TOKEN ? "private" : "public";
+}
+
 function blobOptions() {
   return {
     token: blobToken(),
@@ -19,13 +25,16 @@ function isAccessError(error: unknown) {
 }
 
 async function withBlobAccess<T>(scope: string, action: (access: BlobAccess) => Promise<T>) {
+  const primaryAccess = preferredBlobAccess();
+  const secondaryAccess = primaryAccess === "private" ? "public" : "private";
+
   try {
-    return { access: "public" as const, result: await action("public") };
+    return { access: primaryAccess, result: await action(primaryAccess) };
   } catch (error) {
     if (error instanceof CmsContentConflictError || error instanceof CmsStorageOperationError) throw error;
     if (!isAccessError(error)) throw storageOperationError(scope, error);
     try {
-      return { access: "private" as const, result: await action("private") };
+      return { access: secondaryAccess, result: await action(secondaryAccess) };
     } catch (privateError) {
       throw storageOperationError(scope, privateError);
     }
