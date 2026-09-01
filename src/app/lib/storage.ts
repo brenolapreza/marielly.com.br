@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import { BlobPreconditionFailedError, get, put } from "@vercel/blob";
+import { get, put } from "@vercel/blob";
 
 const configuredBlobToken = () => process.env.BLOB_READ_WRITE_TOKEN || process.env.BLOB_READ_WRITE_TOKEN_READ_WRITE_TOKEN;
 const blobStoreId = () => process.env.BLOB_STORE_ID || process.env.BLOB_READ_WRITE_TOKEN_STORE_ID;
@@ -33,7 +33,7 @@ async function withBlobAccess<T>(scope: string, action: (access: BlobAccess) => 
   try {
     return { access: primaryAccess, result: await action(primaryAccess) };
   } catch (error) {
-    if (error instanceof CmsContentConflictError || error instanceof CmsStorageOperationError) throw error;
+    if (error instanceof CmsStorageOperationError) throw error;
     if (!isAccessError(error)) throw storageOperationError(scope, error);
     try {
       return { access: secondaryAccess, result: await action(secondaryAccess) };
@@ -49,15 +49,6 @@ export class CmsStorageNotConfiguredError extends Error {
   constructor() {
     super("Configure o armazenamento do CMS antes de salvar em produção.");
     this.name = "CmsStorageNotConfiguredError";
-  }
-}
-
-export class CmsContentConflictError extends Error {
-  readonly code = "CMS_CONTENT_CONFLICT";
-
-  constructor() {
-    super("O conteúdo foi alterado em outra sessão. Recarregue a página e tente novamente.");
-    this.name = "CmsContentConflictError";
   }
 }
 
@@ -154,21 +145,15 @@ export async function readPublicBlob(pathname: string) {
   return blob.result;
 }
 
-export async function writePublicBlob(pathname: string, body: string, etag?: string) {
+export async function writePublicBlob(pathname: string, body: string) {
   const blob = await withBlobAccess("storage.write", async (access) => {
-    try {
-      return await put(pathname, body, {
-        access,
-        ...blobOptions(),
-        contentType: "application/json; charset=utf-8",
-        cacheControlMaxAge: 60,
-        allowOverwrite: true,
-        ...(etag ? { ifMatch: etag } : {})
-      });
-    } catch (error) {
-      if (error instanceof BlobPreconditionFailedError) throw new CmsContentConflictError();
-      throw error;
-    }
+    return put(pathname, body, {
+      access,
+      ...blobOptions(),
+      contentType: "application/json; charset=utf-8",
+      cacheControlMaxAge: 60,
+      allowOverwrite: true
+    });
   });
   return blob.result;
 }

@@ -307,8 +307,7 @@ export async function saveSiteContent(input: unknown): Promise<SiteContent> {
   assertProductionStorage();
 
   if (hasBlobStorage()) {
-    const previous = await readPublicBlob(contentBlobPath);
-    await writePublicBlob(contentBlobPath, `${JSON.stringify(nextContent, null, 2)}\n`, previous?.etag);
+    await writePublicBlob(contentBlobPath, `${JSON.stringify(nextContent, null, 2)}\n`);
     return nextContent;
   }
 

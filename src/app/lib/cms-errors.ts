@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { CmsAuthConfigurationError, hasCmsSession } from "./auth";
 import {
-  CmsContentConflictError,
   CmsStorageNotConfiguredError,
   CmsStorageOperationError,
   logCmsError
@@ -30,12 +29,6 @@ export function cmsErrorResponse(scope: string, error: unknown, fallback: string
     return NextResponse.json(
       { error: "Configure o Vercel Blob na Vercel e faça um novo deploy.", code: error.code },
       { status: 503, headers: { "Cache-Control": "no-store" } }
-    );
-  }
-  if (error instanceof CmsContentConflictError) {
-    return NextResponse.json(
-      { error: error.message, code: error.code },
-      { status: 409, headers: { "Cache-Control": "no-store" } }
     );
   }
   if (error instanceof CmsStorageOperationError) {
