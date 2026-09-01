@@ -43,7 +43,7 @@ npm run start
 Before deploying the CMS:
 
 1. Create a Vercel Blob store connected to the project. The CMS supports stores públicas e privadas.
-2. Add the Blob token to the Vercel project's Production environment. The CMS accepts both `BLOB_READ_WRITE_TOKEN` and the integration names `BLOB_READ_WRITE_TOKEN_READ_WRITE_TOKEN` / `BLOB_READ_WRITE_TOKEN_STORE_ID`.
+2. Add the Blob token to the Vercel project's Production environment as `BLOB_READ_WRITE_TOKEN`. The CMS also accepts the integration names `BLOB_READ_WRITE_TOKEN_READ_WRITE_TOKEN` / `BLOB_READ_WRITE_TOKEN_STORE_ID`.
 3. If the store is private, set `BLOB_ACCESS=private` (the integration token name already selects this mode automatically).
 4. Add `CMS_SESSION_SECRET` with a random value of at least 32 characters.
 5. Redeploy after changing environment variables.

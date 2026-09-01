@@ -12,10 +12,12 @@ function preferredBlobAccess(): BlobAccess {
 }
 
 function blobOptions() {
+  const token = configuredBlobToken();
   const storeId = blobStoreId();
   const oidcToken = process.env.VERCEL_OIDC_TOKEN;
+  if (token) return { token, storeId };
   if (oidcToken && storeId) return { oidcToken, storeId };
-  return { token: configuredBlobToken(), storeId };
+  return { token, storeId };
 }
 
 function isAccessError(error: unknown) {
