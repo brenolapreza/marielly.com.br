@@ -1,7 +1,7 @@
 import crypto from "node:crypto";
 import { BlobPreconditionFailedError, get, put } from "@vercel/blob";
 
-const blobToken = () => process.env.BLOB_READ_WRITE_TOKEN || process.env.BLOB_READ_WRITE_TOKEN_READ_WRITE_TOKEN;
+const configuredBlobToken = () => process.env.BLOB_READ_WRITE_TOKEN || process.env.BLOB_READ_WRITE_TOKEN_READ_WRITE_TOKEN;
 const blobStoreId = () => process.env.BLOB_STORE_ID || process.env.BLOB_READ_WRITE_TOKEN_STORE_ID;
 type BlobAccess = "public" | "private";
 
@@ -12,10 +12,10 @@ function preferredBlobAccess(): BlobAccess {
 }
 
 function blobOptions() {
-  return {
-    token: blobToken(),
-    storeId: blobStoreId()
-  };
+  const storeId = blobStoreId();
+  const oidcToken = process.env.VERCEL_OIDC_TOKEN;
+  if (oidcToken && storeId) return { oidcToken, storeId };
+  return { token: configuredBlobToken(), storeId };
 }
 
 function isAccessError(error: unknown) {
@@ -133,7 +133,7 @@ function storageOperationError(scope: string, error: unknown) {
 }
 
 export function hasBlobStorage() {
-  return Boolean(blobToken());
+  return Boolean(configuredBlobToken() || (process.env.VERCEL_OIDC_TOKEN && blobStoreId()));
 }
 
 export function assertProductionStorage() {
