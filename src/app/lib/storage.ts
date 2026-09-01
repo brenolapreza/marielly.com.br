@@ -3,12 +3,33 @@ import { BlobPreconditionFailedError, get, put } from "@vercel/blob";
 
 const blobToken = () => process.env.BLOB_READ_WRITE_TOKEN || process.env.BLOB_READ_WRITE_TOKEN_READ_WRITE_TOKEN;
 const blobStoreId = () => process.env.BLOB_STORE_ID || process.env.BLOB_READ_WRITE_TOKEN_STORE_ID;
+type BlobAccess = "public" | "private";
 
 function blobOptions() {
   return {
     token: blobToken(),
     storeId: blobStoreId()
   };
+}
+
+function isAccessError(error: unknown) {
+  const name = error instanceof Error ? error.name : "";
+  const message = error instanceof Error ? error.message.toLowerCase() : String(error).toLowerCase();
+  return name === "BlobAccessError" || message.includes("forbidden") || message.includes("public blob") || message.includes("private blob");
+}
+
+async function withBlobAccess<T>(scope: string, action: (access: BlobAccess) => Promise<T>) {
+  try {
+    return { access: "public" as const, result: await action("public") };
+  } catch (error) {
+    if (error instanceof CmsContentConflictError || error instanceof CmsStorageOperationError) throw error;
+    if (!isAccessError(error)) throw storageOperationError(scope, error);
+    try {
+      return { access: "private" as const, result: await action("private") };
+    } catch (privateError) {
+      throw storageOperationError(scope, privateError);
+    }
+  }
 }
 
 export class CmsStorageNotConfiguredError extends Error {
@@ -81,7 +102,7 @@ function storageOperationError(scope: string, error: unknown) {
   if (name === "BlobAccessError" || message.includes("forbidden") || message.includes("public")) {
     return new CmsStorageOperationError(
       "CMS_BLOB_ACCESS",
-      "O Blob recusou o acesso. Esta aplicação precisa de uma Blob Store pública ligada a esse token.",
+      "O Blob recusou o acesso. Confirme se o token pertence à Blob Store e se o tipo de acesso está correto (pública ou privada).",
       503,
       reference
     );
@@ -113,48 +134,53 @@ export function assertProductionStorage() {
 }
 
 export async function readPublicBlob(pathname: string) {
-  try {
-    const result = await get(pathname, {
-      access: "public",
-      ...blobOptions(),
-      useCache: false
-    });
+  const blob = await withBlobAccess("storage.read", async (access) => {
+    const result = await get(pathname, { access, ...blobOptions(), useCache: false });
 
     if (!result || result.statusCode !== 200) return null;
     return { text: await new Response(result.stream).text(), etag: result.blob.etag };
-  } catch (error) {
-    throw storageOperationError("storage.read", error);
-  }
+  });
+  return blob.result;
 }
 
 export async function writePublicBlob(pathname: string, body: string, etag?: string) {
-  try {
-    return await put(pathname, body, {
-      access: "public",
-      ...blobOptions(),
-      contentType: "application/json; charset=utf-8",
-      cacheControlMaxAge: 60,
-      allowOverwrite: true,
-      ...(etag ? { ifMatch: etag } : {})
-    });
-  } catch (error) {
-    if (error instanceof BlobPreconditionFailedError) {
-      throw new CmsContentConflictError();
+  const blob = await withBlobAccess("storage.write", async (access) => {
+    try {
+      return await put(pathname, body, {
+        access,
+        ...blobOptions(),
+        contentType: "application/json; charset=utf-8",
+        cacheControlMaxAge: 60,
+        allowOverwrite: true,
+        ...(etag ? { ifMatch: etag } : {})
+      });
+    } catch (error) {
+      if (error instanceof BlobPreconditionFailedError) throw new CmsContentConflictError();
+      throw error;
     }
-    throw storageOperationError("storage.write", error);
-  }
+  });
+  return blob.result;
 }
 
 export async function uploadPublicBlob(pathname: string, body: File) {
+  const blob = await withBlobAccess("storage.upload", (access) => put(pathname, body, {
+    access,
+    ...blobOptions(),
+    contentType: body.type,
+    cacheControlMaxAge: 31536000,
+    allowOverwrite: false
+  }));
+
+  return blob.access === "private"
+    ? { ...blob.result, url: `/api/cms/media?pathname=${encodeURIComponent(blob.result.pathname)}` }
+    : blob.result;
+}
+
+export async function readPrivateBlob(pathname: string) {
   try {
-    return await put(pathname, body, {
-      access: "public",
-      ...blobOptions(),
-      contentType: body.type,
-      cacheControlMaxAge: 31536000,
-      allowOverwrite: false
-    });
+    const result = await get(pathname, { access: "private", ...blobOptions(), useCache: false });
+    return result && result.statusCode === 200 ? result : null;
   } catch (error) {
-    throw storageOperationError("storage.upload", error);
+    throw storageOperationError("storage.media", error);
   }
 }
