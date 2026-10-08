@@ -38,7 +38,7 @@ export default async function AboutPage() {
           <p className="about-page-intro">{content.aboutPage.intro}</p>
           <Link className="text-link" href="/#contato">Vamos conversar</Link>
         </div>
-        <div className="about-page-visual image-frame">
+        <div className={`about-page-visual image-frame image-${content.aboutPage.imageShape}`}>
           <img src={content.aboutPage.image} alt={content.aboutPage.imageAlt} fetchPriority="high" />
           <span className="image-number">02 / minha história</span>
         </div>

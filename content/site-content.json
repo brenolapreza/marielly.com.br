@@ -21,8 +21,9 @@
     "primaryButtonLabel": "Agendar conversa",
     "primaryButtonUrl": "https://wa.me/5511999999999",
     "secondaryButtonLabel": "Conhecer meu trabalho",
-    "image": "/marielly.png",
-    "imageAlt": "Marielly Lapreza, psicóloga clínica"
+    "image": "/marielly-home.jpg",
+    "imageAlt": "Marielly Lapreza sorrindo, sentada em uma poltrona",
+    "imageShape": "square"
   },
   "about": {
     "eyebrow": "Sobre mim",
@@ -32,7 +33,8 @@
       "Meu trabalho é oferecer um espaço acolhedor para você compreender o que sente, encontrar novos caminhos e viver com mais leveza."
     ],
     "image": "/image_help-01.png",
-    "imageAlt": "Atendimento de psicoterapia online"
+    "imageAlt": "Atendimento de psicoterapia online",
+    "imageShape": "square"
   },
   "aboutPage": {
     "eyebrow": "Prazer, eu sou a Marielly",
@@ -49,7 +51,8 @@
       "Na psicoterapia, ofereço um espaço seguro para compreender o que você sente, encontrar novos caminhos e caminhar no seu ritmo."
     ],
     "image": "/marielly.png",
-    "imageAlt": "Marielly Lapreza, psicóloga clínica"
+    "imageAlt": "Marielly Lapreza, psicóloga clínica",
+    "imageShape": "square"
   },
   "method": {
     "eyebrow": "Um processo possível",

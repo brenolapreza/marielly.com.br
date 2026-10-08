@@ -2,6 +2,8 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 import { assertProductionStorage, hasBlobStorage, readPublicBlob, writePublicBlob } from "./storage";
 
+type ImageShape = "square" | "rectangle";
+
 export type SiteContent = {
   brand: {
     name: string;
@@ -27,6 +29,7 @@ export type SiteContent = {
     secondaryButtonLabel: string;
     image: string;
     imageAlt: string;
+    imageShape: ImageShape;
   };
   about: {
     eyebrow: string;
@@ -34,6 +37,7 @@ export type SiteContent = {
     paragraphs: string[];
     image: string;
     imageAlt: string;
+    imageShape: ImageShape;
   };
   aboutPage: {
     eyebrow: string;
@@ -45,6 +49,7 @@ export type SiteContent = {
     professionalParagraphs: string[];
     image: string;
     imageAlt: string;
+    imageShape: ImageShape;
   };
   method: {
     eyebrow: string;
@@ -98,8 +103,9 @@ const defaultSiteContent: SiteContent = {
     primaryButtonLabel: "Agendar conversa",
     primaryButtonUrl: "https://wa.me/5511999999999",
     secondaryButtonLabel: "Conhecer meu trabalho",
-    image: "/marielly.png",
-    imageAlt: "Marielly Lapreza, psicóloga clínica"
+    image: "/marielly-home.jpg",
+    imageAlt: "Marielly Lapreza sorrindo, sentada em uma poltrona",
+    imageShape: "square"
   },
   about: {
     eyebrow: "Sobre mim",
@@ -109,7 +115,8 @@ const defaultSiteContent: SiteContent = {
       "Meu trabalho é oferecer um espaço acolhedor para você compreender o que sente, encontrar novos caminhos e viver com mais leveza."
     ],
     image: "/image_help-01.png",
-    imageAlt: "Atendimento de psicoterapia online"
+    imageAlt: "Atendimento de psicoterapia online",
+    imageShape: "square"
   },
   aboutPage: {
     eyebrow: "Prazer, eu sou a Marielly",
@@ -126,7 +133,8 @@ const defaultSiteContent: SiteContent = {
       "Na psicoterapia, ofereço um espaço seguro para compreender o que você sente, encontrar novos caminhos e caminhar no seu ritmo."
     ],
     image: "/marielly.png",
-    imageAlt: "Marielly Lapreza, psicóloga clínica"
+    imageAlt: "Marielly Lapreza, psicóloga clínica",
+    imageShape: "square"
   },
   method: {
     eyebrow: "Um processo possível",
@@ -165,6 +173,7 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
 const color = (value: unknown, fallback: string) =>
   typeof value === "string" && /^#[0-9a-fA-F]{6}$/.test(value.trim()) ? value.trim() : fallback;
+const readImageShape = (value: unknown): ImageShape => value === "rectangle" ? "rectangle" : "square";
 const safeUrl = (value: unknown, fallback: string, allowMail = false) => {
   if (typeof value !== "string") return fallback;
   const candidate = value.trim();
@@ -196,6 +205,7 @@ function normalizeContent(input: unknown): SiteContent {
   const personalParagraphs = readParagraphs(aboutPage.personalParagraphs, defaultSiteContent.aboutPage.personalParagraphs);
   const professionalParagraphs = readParagraphs(aboutPage.professionalParagraphs, defaultSiteContent.aboutPage.professionalParagraphs);
   const rawCards = Array.isArray(method.cards) ? method.cards : [];
+  const heroImage = safeUrl(hero.image, defaultSiteContent.hero.image);
   const cards = rawCards.slice(0, 4).map((rawCard, index) => {
     const card = isRecord(rawCard) ? rawCard : {};
     const fallback = defaultSiteContent.method.cards[index] ?? defaultSiteContent.method.cards[0];
@@ -231,15 +241,18 @@ function normalizeContent(input: unknown): SiteContent {
       primaryButtonLabel: textLimit(hero.primaryButtonLabel, defaultSiteContent.hero.primaryButtonLabel, 50),
       primaryButtonUrl: safeUrl(hero.primaryButtonUrl, defaultSiteContent.hero.primaryButtonUrl, true),
       secondaryButtonLabel: textLimit(hero.secondaryButtonLabel, defaultSiteContent.hero.secondaryButtonLabel, 60),
-      image: safeUrl(hero.image, defaultSiteContent.hero.image),
-      imageAlt: textLimit(hero.imageAlt, defaultSiteContent.hero.imageAlt, 160)
+      // The previous bundled portrait was the homepage default; migrate saved CMS content too.
+      image: heroImage === "/marielly.png" ? defaultSiteContent.hero.image : heroImage,
+      imageAlt: textLimit(hero.imageAlt, defaultSiteContent.hero.imageAlt, 160),
+      imageShape: readImageShape(hero.imageShape)
     },
     about: {
       eyebrow: textLimit(about.eyebrow, defaultSiteContent.about.eyebrow, 80),
       title: textLimit(about.title, defaultSiteContent.about.title, 180),
       paragraphs: paragraphs.length ? paragraphs : defaultSiteContent.about.paragraphs,
       image: safeUrl(about.image, defaultSiteContent.about.image),
-      imageAlt: textLimit(about.imageAlt, defaultSiteContent.about.imageAlt, 160)
+      imageAlt: textLimit(about.imageAlt, defaultSiteContent.about.imageAlt, 160),
+      imageShape: readImageShape(about.imageShape)
     },
     aboutPage: {
       eyebrow: textLimit(aboutPage.eyebrow, defaultSiteContent.aboutPage.eyebrow, 80),
@@ -250,7 +263,8 @@ function normalizeContent(input: unknown): SiteContent {
       professionalTitle: textLimit(aboutPage.professionalTitle, defaultSiteContent.aboutPage.professionalTitle, 160),
       professionalParagraphs: professionalParagraphs.length ? professionalParagraphs : defaultSiteContent.aboutPage.professionalParagraphs,
       image: safeUrl(aboutPage.image, defaultSiteContent.aboutPage.image),
-      imageAlt: textLimit(aboutPage.imageAlt, defaultSiteContent.aboutPage.imageAlt, 160)
+      imageAlt: textLimit(aboutPage.imageAlt, defaultSiteContent.aboutPage.imageAlt, 160),
+      imageShape: readImageShape(aboutPage.imageShape)
     },
     method: {
       eyebrow: textLimit(method.eyebrow, defaultSiteContent.method.eyebrow, 80),

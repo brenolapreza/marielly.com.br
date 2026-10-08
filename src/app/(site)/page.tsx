@@ -42,7 +42,7 @@ export default async function Home() {
           </div>
           <div className="hero-note"><span className="note-dot" /> Atendimento individual, 100% online</div>
         </div>
-        <div className="hero-visual">
+        <div className={`hero-visual image-${content.hero.imageShape}`}>
           <div className="visual-caption"><span>01</span><span>presença &amp; cuidado</span></div>
           <img src={content.hero.image} alt={content.hero.imageAlt} fetchPriority="high" />
         </div>
@@ -57,7 +57,7 @@ export default async function Home() {
       </section>
 
       <section className="about-section container section-grid" id="sobre">
-        <div className="about-visual image-frame">
+        <div className={`about-visual image-frame image-${content.about.imageShape}`}>
           <img src={content.about.image} alt={content.about.imageAlt} loading="lazy" />
           <span className="image-number">02 / sobre</span>
         </div>
